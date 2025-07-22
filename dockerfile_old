@@ -1,0 +1,29 @@
+FROM ubuntu:latest
+ENV TERM=linux
+ENV AIRFLOW_HOME=~/etl_dac
+ARG USERNAME=ryuk
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME --home /home/$USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+USER $USERNAME
+
+RUN mkdir -p /home/$USERNAME/etl_dac
+WORKDIR /home/$USERNAME/etl_dac
+COPY . ./
+
+RUN sudo apt -y install apt-utils
+RUN sudo apt -y install python3-pip
+ENV PATH="/home/$USERNAME/.local/bin:$PATH"
+RUN pip3 install -r requirements.txt
+
+EXPOSE 8080
+RUN airflow db init \
+    && airflow users create --username ryuk --firstname Ryuk --lastname Shinigami --role Admin --email rodrigomoroni@hotmail.com --password kira \
+    && airflow webserver --port 8080
+RUN airflow scheduler

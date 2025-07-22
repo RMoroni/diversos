@@ -1,0 +1,59 @@
+Prepara ambiente:
+    # Instala Pip, PostgreSQL e Virtualenv
+    sudo apt-get install python3-pip python3-dev libpq-dev postgresql postgresql-contrib virtualenv
+    # PostgreSQL
+    # Cria pasta do projeto
+    mkdir projeto
+    cd projeto
+    # Cria arquivo de requirements
+    touch requiremtens.txt
+    # Insere os requirements
+    django
+    psycopg2
+    # Cria ambiente virtual
+    virtualenv venv
+    # Ativa virtualenv
+    source venv/bin/activate
+    # Instala os requirements
+    pip3 install -r requirements.txt
+    # Cria projeto
+    django-admin startproject projeto
+
+Configurando PostgreSQL:
+    sudo su - postgres
+    psql
+    CREATE DATABASE myproject;
+    CREATE USER myprojectuser WITH PASSWORD 'password';
+    ALTER ROLE myprojectuser SET client_encoding TO 'utf8';
+    ALTER ROLE myprojectuser SET default_transaction_isolation TO 'read committed';
+    ALTER ROLE myprojectuser SET timezone TO 'UTC';
+    GRANT ALL PRIVILEGES ON DATABASE myproject TO myprojectuser;
+    \q
+    exit
+
+Altera configurações do projeto/django:
+    TIME_ZONE = 'America/Sao_Paulo'
+    LANGUAGE_CODE = 'pt-BR'
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'myproject',
+        'USER': 'myprojectuser',
+        'PASSWORD': 'password',
+        'HOST': 'localhost',
+        'PORT': '',
+    }
+}
+
+Migrate e Test:
+    cd ~/myproject
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py createsuperuser
+    python manage.py runserver 0.0.0.0:8000
+
+Criando uma aplicação:
+    python manage.py startapp aplicacao
+    # Insere 'aplicacao' em INSTALLED_APPS (settings)
